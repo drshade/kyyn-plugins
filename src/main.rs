@@ -46,7 +46,7 @@ mod manifest_drift {
         config: Vec<Field>,
     }
     #[derive(Deserialize, Default)]
-    #[serde(default)]
+    #[serde(default, deny_unknown_fields)]
     struct Field {
         name: String,
         doc: String,
