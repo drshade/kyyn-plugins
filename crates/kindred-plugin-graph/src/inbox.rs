@@ -64,6 +64,10 @@ pub struct InboxEvent {
     pub teams: bool,
     pub location: Option<String>,
     pub transcript_file: Option<String>,
+    /// Attendance-report JSON (who actually joined, for how long), relative
+    /// to the run dir — independent of the transcript.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub attendance_file: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -129,7 +133,11 @@ pub fn to_inbox_email(cfg: &Config, m: GraphMessage) -> InboxEmail {
     }
 }
 
-pub fn to_inbox_event(transcript_file: Option<String>, e: GraphEvent) -> InboxEvent {
+pub fn to_inbox_event(
+    transcript_file: Option<String>,
+    attendance_file: Option<String>,
+    e: GraphEvent,
+) -> InboxEvent {
     InboxEvent {
         id: e.id,
         subject: e.subject,
@@ -144,6 +152,7 @@ pub fn to_inbox_event(transcript_file: Option<String>, e: GraphEvent) -> InboxEv
         teams: e.is_online_meeting.unwrap_or(false),
         location: e.location.and_then(|l| l.display_name),
         transcript_file,
+        attendance_file,
     }
 }
 

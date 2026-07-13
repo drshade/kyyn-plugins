@@ -157,6 +157,19 @@ pub struct GraphChat {
     pub members: Vec<ChatMember>,
 }
 
+/// One held session's attendance report (`/attendanceReports`) — the
+/// records hang off it; these fields attribute it to a calendar occurrence.
+#[derive(Debug, Clone, Deserialize)]
+pub struct AttendanceReport {
+    pub id: String,
+    #[serde(rename = "meetingStartDateTime")]
+    pub meeting_start: Option<String>,
+    #[serde(rename = "meetingEndDateTime")]
+    pub meeting_end: Option<String>,
+    #[serde(rename = "totalParticipantCount")]
+    pub total_participant_count: Option<u32>,
+}
+
 /// The bits of a driveItem (`/shares/{token}/driveItem`, folder children)
 /// we need.
 #[derive(Debug, Clone, Deserialize)]

@@ -12,6 +12,7 @@ use crate::config::Config;
 
 pub const SCOPES: &str = "Mail.Read Calendars.Read User.Read Chat.Read \
      OnlineMeetings.Read OnlineMeetingTranscript.Read.All \
+     OnlineMeetingArtifact.Read.All \
      Files.Read.All Sites.Read.All offline_access";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

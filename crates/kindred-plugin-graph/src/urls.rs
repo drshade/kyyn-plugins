@@ -79,6 +79,19 @@ pub fn online_meeting_lookup_url(join_url: &str) -> String {
     )
 }
 
+/// `/me/onlineMeetings/{id}/attendanceReports` — one per held session.
+pub fn attendance_reports_url(meeting_id: &str) -> String {
+    format!("{GRAPH_BASE}/me/onlineMeetings/{meeting_id}/attendanceReports")
+}
+
+/// `…/attendanceReports/{rid}/attendanceRecords` — per-participant identity,
+/// total seconds attended, role, and join/leave intervals.
+pub fn attendance_records_url(meeting_id: &str, report_id: &str) -> String {
+    format!(
+        "{GRAPH_BASE}/me/onlineMeetings/{meeting_id}/attendanceReports/{report_id}/attendanceRecords"
+    )
+}
+
 /// `/me/onlineMeetings/{id}/transcripts`.
 pub fn transcripts_url(meeting_id: &str) -> String {
     format!("{GRAPH_BASE}/me/onlineMeetings/{meeting_id}/transcripts")

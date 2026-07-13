@@ -60,6 +60,27 @@ pub fn slugify(s: &str) -> String {
     out.trim_matches('-').chars().take(60).collect()
 }
 
+/// Attribute a series' attendance-report list to a calendar occurrence,
+/// mirroring [`pick_transcript_for`]: among reports whose
+/// meetingStartDateTime falls in `[start − 1h, end + 6h]` (early joiners
+/// start a session before the calendar slot), return the latest.
+pub fn pick_report_for<'a>(
+    start: &DateTimeTimeZone,
+    end: &DateTimeTimeZone,
+    reports: &'a [crate::graph::AttendanceReport],
+) -> Option<&'a crate::graph::AttendanceReport> {
+    let start = parse_graph_time(&start.date_time)? - Duration::hours(1);
+    let window_end = parse_graph_time(&end.date_time)? + Duration::hours(6);
+    reports
+        .iter()
+        .filter_map(|r| {
+            let st = parse_graph_time(r.meeting_start.as_deref()?)?;
+            (st >= start && st <= window_end).then_some((st, r))
+        })
+        .max_by_key(|(st, _)| *st)
+        .map(|(_, r)| r)
+}
+
 /// `YYYY-MM-DD-<subject-slug>-<id-suffix>.vtt`. Falls back to `untitled` when
 /// the subject is absent/empty; the id suffix is the last 8 chars of the
 /// slugified event id (Graph ids share a long prefix — the tail carries the
@@ -83,6 +104,43 @@ pub fn transcript_file_name(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn report_picker_matches_occurrences_with_early_join_grace() {
+        use crate::graph::AttendanceReport;
+        let dtz = |s: &str| DateTimeTimeZone {
+            date_time: s.into(),
+            time_zone: String::new(),
+        };
+        let report = |id: &str, start: &str| AttendanceReport {
+            id: id.into(),
+            meeting_start: Some(start.into()),
+            meeting_end: None,
+            total_participant_count: None,
+        };
+        let reports = vec![
+            report("last-week", "2026-07-06T10:02:00Z"),
+            report("early-join", "2026-07-13T09:45:00Z"),
+            report("in-window", "2026-07-13T10:01:00Z"),
+        ];
+        // Latest in [start − 1h, end + 6h] wins; early joiners still match.
+        let picked = pick_report_for(
+            &dtz("2026-07-13T10:00:00"),
+            &dtz("2026-07-13T11:00:00"),
+            &reports,
+        )
+        .unwrap();
+        assert_eq!(picked.id, "in-window");
+        // A different week's occurrence never leaks across.
+        assert!(
+            pick_report_for(
+                &dtz("2026-07-20T10:00:00"),
+                &dtz("2026-07-20T11:00:00"),
+                &reports,
+            )
+            .is_none()
+        );
+    }
     use crate::graph::{DateTimeTimeZone, Transcript};
 
     fn dtz(s: &str) -> DateTimeTimeZone {

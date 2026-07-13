@@ -248,7 +248,7 @@ pub async fn sync_calendar(
     kindred_core::progress::report(&format!("{} events in window", raw_events.len()));
     let events: Vec<InboxEvent> = raw_events
         .into_iter()
-        .map(|e| to_inbox_event(None, e))
+        .map(|e| to_inbox_event(None, None, e))
         .collect();
     write_records(&out_dir.join("events.json"), &events)?;
     let mut items = Vec::new();
@@ -272,25 +272,46 @@ pub async fn sync_meetings(
     let graph = GraphClient::new(http, token).with_text_bodies();
     let raw_events = events_for(&graph, wf, wt).await?;
     kindred_core::progress::report(&format!(
-        "{} events in window; checking for transcripts…",
+        "{} events in window; checking for transcripts and attendance…",
         raw_events.len()
     ));
-    let files = fetch_transcripts(&graph, &raw_events, &out_dir.join("transcripts")).await?;
+    let artifacts = fetch_artifacts(&graph, &raw_events, out_dir).await?;
+    // EITHER artifact makes the event a meeting item — a talk can have
+    // attendance recorded with transcription off, and vice versa.
     let meetings: Vec<InboxEvent> = raw_events
         .into_iter()
-        .zip(files.iter())
-        .filter_map(|(e, f)| {
-            f.as_ref()
-                .map(|name| to_inbox_event(Some(format!("transcripts/{name}")), e))
+        .zip(artifacts)
+        .filter_map(|(e, (transcript, attendance))| {
+            (transcript.is_some() || attendance.is_some()).then(|| {
+                to_inbox_event(
+                    transcript.map(|n| format!("transcripts/{n}")),
+                    attendance.map(|n| format!("attendance/{n}")),
+                    e,
+                )
+            })
         })
         .collect();
-    kindred_core::progress::report(&format!("{} meetings carry transcripts", meetings.len()));
+    kindred_core::progress::report(&format!(
+        "{} meetings carry artifacts ({} transcripts, {} attendance reports)",
+        meetings.len(),
+        meetings
+            .iter()
+            .filter(|m| m.transcript_file.is_some())
+            .count(),
+        meetings
+            .iter()
+            .filter(|m| m.attendance_file.is_some())
+            .count(),
+    ));
     write_records(&out_dir.join("meetings.json"), &meetings)?;
     let mut items = Vec::new();
     for m in &meetings {
         let mut item = record_item("meeting", &m.id, "meetings.json", &m.subject, m)?;
         if let Some(t) = &m.transcript_file {
             item.files.push(t.clone());
+        }
+        if let Some(a) = &m.attendance_file {
+            item.files.push(a.clone());
         }
         items.push(item);
     }
@@ -350,55 +371,69 @@ pub async fn sync_chats(
 /// written filename per event (index-aligned to `events`). Concurrent and
 /// best-effort — an event with no joinUrl / meeting / matching transcript /
 /// content yields `None`.
-async fn fetch_transcripts(
+type Artifacts = (Option<String>, Option<String>);
+
+async fn fetch_artifacts(
     graph: &GraphClient,
     events: &[GraphEvent],
     out_dir: &Path,
-) -> Result<Vec<Option<String>>> {
-    let indexed: Vec<(usize, Option<String>)> = futures::stream::iter(events.iter().enumerate())
-        .map(
-            |(i, e)| async move { anyhow::Ok((i, fetch_one_transcript(graph, e, out_dir).await?)) },
-        )
+) -> Result<Vec<Artifacts>> {
+    let indexed: Vec<(usize, Artifacts)> = futures::stream::iter(events.iter().enumerate())
+        .map(|(i, e)| async move { anyhow::Ok((i, fetch_one_artifacts(graph, e, out_dir).await?)) })
         .buffer_unordered(TRANSCRIPT_CONCURRENCY)
         .collect::<Vec<_>>()
         .await
         .into_iter()
         .collect::<Result<Vec<_>>>()?;
-    let mut out = vec![None; events.len()];
+    let mut out = vec![(None, None); events.len()];
     for (i, f) in indexed {
         out[i] = f;
     }
     Ok(out)
 }
 
-/// Resolve one event's transcript: joinUrl → online meeting → transcript list →
-/// occurrence match → VTT content, written to `out_dir`. Returns its filename,
-/// or `None` at any missing step (403/404 included).
-async fn fetch_one_transcript(
+/// Resolve one event's artifacts: joinUrl → online meeting, then transcript
+/// and attendance report INDEPENDENTLY (a talk can have either without the
+/// other). Returns (transcript file, attendance file), each `None` at any
+/// missing step (403/404 included — not-organizer is an expected state).
+async fn fetch_one_artifacts(
     graph: &GraphClient,
     e: &GraphEvent,
     out_dir: &Path,
-) -> Result<Option<String>> {
+) -> Result<Artifacts> {
     let Some(join_url) = e
         .online_meeting
         .as_ref()
         .and_then(|m| m.join_url.as_deref())
     else {
-        return Ok(None);
+        return Ok((None, None));
     };
     use crate::client::PageOutcome;
     // ALL pages (bounded), not just the first; per-item denial/absence is an
-    // expected skip (not organizer / no transcript), never a run failure.
+    // expected skip (not organizer / no artifact), never a run failure.
     let meetings = match graph
         .fetch_item_pages::<OnlineMeeting>(&urls::online_meeting_lookup_url(join_url))
         .await?
     {
         PageOutcome::Page(m, _) => m,
-        PageOutcome::Absent | PageOutcome::Denied => return Ok(None),
+        PageOutcome::Absent | PageOutcome::Denied => return Ok((None, None)),
     };
     let Some(mtg) = meetings.into_iter().next() else {
-        return Ok(None);
+        return Ok((None, None));
     };
+    let transcript = fetch_transcript_of(graph, e, &mtg, &out_dir.join("transcripts")).await?;
+    let attendance = fetch_attendance_of(graph, e, &mtg, &out_dir.join("attendance")).await?;
+    Ok((transcript, attendance))
+}
+
+/// The transcript half: transcript list → occurrence match → VTT content.
+async fn fetch_transcript_of(
+    graph: &GraphClient,
+    e: &GraphEvent,
+    mtg: &OnlineMeeting,
+    out_dir: &Path,
+) -> Result<Option<String>> {
+    use crate::client::PageOutcome;
     let transcripts = match graph
         .fetch_item_pages::<Transcript>(&urls::transcripts_url(&mtg.id))
         .await?
@@ -425,6 +460,51 @@ async fn fetch_one_transcript(
     let fname = transcript_file_name(&e.start.date_time, e.subject.as_deref(), &e.id);
     std::fs::create_dir_all(out_dir)?;
     std::fs::write(out_dir.join(&fname), bytes)?;
+    Ok(Some(fname))
+}
+
+/// The attendance half: report list → occurrence match → per-participant
+/// records (identity, total seconds, join/leave intervals), written as one
+/// JSON file. Records are stored AS GRAPH RETURNS THEM (custody, not
+/// interpretation) under a small envelope naming the report.
+async fn fetch_attendance_of(
+    graph: &GraphClient,
+    e: &GraphEvent,
+    mtg: &OnlineMeeting,
+    out_dir: &Path,
+) -> Result<Option<String>> {
+    use crate::client::PageOutcome;
+    let reports = match graph
+        .fetch_item_pages::<crate::graph::AttendanceReport>(&urls::attendance_reports_url(&mtg.id))
+        .await?
+    {
+        PageOutcome::Page(r, _) => r,
+        PageOutcome::Absent | PageOutcome::Denied => return Ok(None),
+    };
+    let Some(report) = crate::transcript::pick_report_for(&e.start, &e.end, &reports) else {
+        return Ok(None);
+    };
+    let records = match graph
+        .fetch_item_pages::<serde_json::Value>(&urls::attendance_records_url(&mtg.id, &report.id))
+        .await?
+    {
+        PageOutcome::Page(r, _) => r,
+        PageOutcome::Absent | PageOutcome::Denied => return Ok(None),
+    };
+    let envelope = serde_json::json!({
+        "reportId": report.id,
+        "meetingStartDateTime": report.meeting_start,
+        "meetingEndDateTime": report.meeting_end,
+        "totalParticipantCount": report.total_participant_count,
+        "records": records,
+    });
+    let vtt_name = transcript_file_name(&e.start.date_time, e.subject.as_deref(), &e.id);
+    let fname = format!("{}.json", vtt_name.trim_end_matches(".vtt"));
+    std::fs::create_dir_all(out_dir)?;
+    std::fs::write(
+        out_dir.join(&fname),
+        serde_json::to_string_pretty(&envelope)?,
+    )?;
     Ok(Some(fname))
 }
 
