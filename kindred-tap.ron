@@ -1,0 +1,27 @@
+// The first-party kindred tap — advertised plugins and the binary serving
+// them (`kindred-plugins --plugin <name>`, one RON request per invocation).
+(
+    tap: 1,
+    binary: "kindred-plugins",
+    plugins: [
+        (name: "sweep", summary: "Glob a local directory tree into hashed, versioned evidence.",
+         namespace: "file"),
+        (name: "kb", summary: "Ingest another kindred KB as evidence — federation via curation.",
+         namespace: "kb"),
+        (name: "graph-mail", summary: "Microsoft 365 mail (with attachments); narrow with mail_filter.",
+         namespace: "graph",
+         capabilities: (network: ["graph.microsoft.com", "login.microsoftonline.com"], auth: Some("ms-graph"))),
+        (name: "graph-calendar", summary: "Microsoft 365 calendar events.",
+         namespace: "graph",
+         capabilities: (network: ["graph.microsoft.com", "login.microsoftonline.com"], auth: Some("ms-graph"))),
+        (name: "graph-meetings", summary: "Teams meetings that carry transcripts.",
+         namespace: "graph",
+         capabilities: (network: ["graph.microsoft.com", "login.microsoftonline.com"], auth: Some("ms-graph"))),
+        (name: "graph-chats", summary: "Teams chats and their messages (the slow crawl).",
+         namespace: "graph",
+         capabilities: (network: ["graph.microsoft.com", "login.microsoftonline.com"], auth: Some("ms-graph"))),
+        (name: "sharepoint-file", summary: "A tracked SharePoint/OneDrive file or folder, snapshot-fetched.",
+         namespace: "sharepoint",
+         capabilities: (network: ["graph.microsoft.com", "login.microsoftonline.com", "*.sharepoint.com"], auth: Some("ms-graph"))),
+    ],
+)

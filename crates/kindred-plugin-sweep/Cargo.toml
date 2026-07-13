@@ -1,0 +1,19 @@
+[package]
+name = "kindred-plugin-sweep"
+version = "0.1.0"
+edition = "2024"
+description = "Generic file-sweep source plugin for kindred: glob a directory tree into hashed, immutable evidence."
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/drshade/kindred-plugins-core"
+
+publish = false
+
+[dependencies]
+kindred-core = { git = "ssh://git@github.com/drshade/kindred", rev = "288c53f35cd6183dd0951c3238e3a8156d1dd3b3" }
+serde = { version = "1", features = ["derive"] }
+ron = "0.12"
+sha2 = "0.10"
+glob = "0.3"
+
+[dev-dependencies]
+tempfile = "3"

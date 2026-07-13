@@ -1,0 +1,20 @@
+# The first-party kindred tap: sweep, kb, and the Microsoft Graph family,
+# served over the tap harness. This repo is never published to crates.io —
+# KBs pin it (repo, rev) in sources.ron and build it on first use.
+[package]
+name = "kindred-plugins"
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[dependencies]
+# ssh + rev pin while the kindred repo is private; becomes a plain
+# crates.io version dep once kindred-core 0.1.8 is published.
+kindred-core = { git = "ssh://git@github.com/drshade/kindred", rev = "288c53f35cd6183dd0951c3238e3a8156d1dd3b3" }
+kindred-plugin-graph = { path = "crates/kindred-plugin-graph" }
+kindred-plugin-kb = { path = "crates/kindred-plugin-kb" }
+kindred-plugin-sweep = { path = "crates/kindred-plugin-sweep" }
+
+[workspace]
+members = ["crates/kindred-plugin-graph", "crates/kindred-plugin-kb", "crates/kindred-plugin-sweep"]
