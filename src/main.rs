@@ -26,7 +26,6 @@ fn main() {
 
 #[cfg(test)]
 mod manifest_drift {
-    use kindred_core::plugin::SourcePlugin;
     use serde::Deserialize;
 
     // A tolerant local mirror of the manifest shapes (the published
