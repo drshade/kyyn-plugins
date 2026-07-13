@@ -29,7 +29,12 @@ pub struct SharepointFilePlugin;
 struct SpConfig {
     /// The sharing link of the tracked file or folder.
     url: String,
+    /// Azure app (client) id — default: the shared multi-tenant "kindred"
+    /// registration (see [`crate::config::DEFAULT_CLIENT_ID`]).
+    #[serde(default = "default_client_id")]
     client_id: String,
+    /// Entra tenant GUID, or `organizations` (the default).
+    #[serde(default = "default_tenant")]
     tenant: String,
     /// Folder targets only: glob patterns over folder-relative paths
     /// (`**/*.xlsx`), sweep semantics — path-aware (`*` stays within one
@@ -47,6 +52,12 @@ struct SpConfig {
     max_file_bytes: u64,
 }
 
+fn default_client_id() -> String {
+    crate::config::DEFAULT_CLIENT_ID.into()
+}
+fn default_tenant() -> String {
+    crate::config::DEFAULT_TENANT.into()
+}
 fn default_patterns() -> Vec<String> {
     vec!["**/*".into()]
 }
@@ -181,7 +192,7 @@ fn parse_config(text: &str) -> Result<SpConfig, String> {
     let value: ron::Value = ron::from_str(text).map_err(|e| format!("config: {e}"))?;
     value.into_rust().map_err(|e| {
         format!(
-            "config (need url, client_id, tenant; optional patterns, kind, max_file_bytes): {e}"
+            "config (need url; optional client_id, tenant, patterns, kind, max_file_bytes): {e}"
         )
     })
 }

@@ -5,12 +5,34 @@
 use anyhow::{Context, Result};
 use serde::Deserialize;
 
+/// The shared "kindred" app registration — MULTI-TENANT and a public client
+/// (device-code flow; a client id is not a secret), so any org's users sign
+/// in with it after their tenant consents. Overridable per instance for
+/// orgs that register their own app.
+pub const DEFAULT_CLIENT_ID: &str = "53ddb21b-849f-45a3-8168-8a0e555f386f";
+/// Entra's multi-tenant work/school endpoint — any organizational
+/// directory, resolved to the user's own tenant at sign-in.
+pub const DEFAULT_TENANT: &str = "organizations";
+
+fn default_client_id() -> String {
+    DEFAULT_CLIENT_ID.into()
+}
+fn default_tenant() -> String {
+    DEFAULT_TENANT.into()
+}
+
 // deny_unknown_fields: a misspelled or wished-for key (`search: …`) must
 // fail validation by name, never be silently ignored.
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Config {
+    /// Azure app (client) id. Default: the shared multi-tenant "kindred"
+    /// registration — set both this and `tenant` to use your org's own.
+    #[serde(default = "default_client_id")]
     pub client_id: String,
+    /// Entra tenant: a tenant GUID, or `organizations` (any work/school
+    /// directory — the default, paired with the shared registration).
+    #[serde(default = "default_tenant")]
     pub tenant: String,
     #[serde(default)]
     pub owner_addresses: Vec<String>,
@@ -29,9 +51,19 @@ impl Config {
     /// builds the struct regardless of map/struct notation).
     pub fn from_ron(text: &str) -> Result<Config> {
         let value: ron::Value = ron::from_str(text).context("parsing source config")?;
+        // No config at all (`()` — the engine's spelling of an absent
+        // config): every field has a default, so that IS a valid config.
+        if matches!(value, ron::Value::Unit) {
+            return Ok(Config {
+                client_id: default_client_id(),
+                tenant: default_tenant(),
+                owner_addresses: Vec::new(),
+                mail_filter: None,
+            });
+        }
         value
             .into_rust()
-            .context("source config shape (need client_id, tenant, owner_addresses)")
+            .context("source config shape (all fields optional: client_id, tenant, owner_addresses, mail_filter)")
     }
 
     pub fn device_code_url(&self) -> String {
@@ -92,5 +124,28 @@ mod tests {
                 .mail_filter
                 .is_none()
         );
+    }
+}
+
+#[cfg(test)]
+mod default_tests {
+    use super::*;
+
+    /// A minimal `()` config gets the shared multi-tenant registration —
+    /// zero Azure knowledge needed; explicit fields still override.
+    #[test]
+    fn defaults_are_the_shared_multitenant_app() {
+        let cfg = Config::from_ron("()").unwrap();
+        assert_eq!(cfg.client_id, DEFAULT_CLIENT_ID);
+        assert_eq!(cfg.tenant, "organizations");
+        assert!(cfg.device_code_url().contains("/organizations/"));
+        let absent = Config::from_ron("()").unwrap();
+        assert_eq!(
+            absent.tenant, "organizations",
+            "absent config = all defaults"
+        );
+        let own = Config::from_ron(r#"(client_id: "mine", tenant: "t1")"#).unwrap();
+        assert_eq!(own.client_id, "mine");
+        assert_eq!(own.tenant, "t1");
     }
 }
