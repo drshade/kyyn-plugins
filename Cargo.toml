@@ -16,5 +16,9 @@ kindred-plugin-kb = { path = "crates/kindred-plugin-kb" }
 kindred-plugin-salesforce = { path = "crates/kindred-plugin-salesforce" }
 kindred-plugin-sweep = { path = "crates/kindred-plugin-sweep" }
 
+[dev-dependencies]
+ron = "0.12"
+serde = { version = "1", features = ["derive"] }
+
 [workspace]
 members = ["crates/kindred-plugin-git", "crates/kindred-plugin-graph", "crates/kindred-plugin-kb", "crates/kindred-plugin-salesforce", "crates/kindred-plugin-sweep"]

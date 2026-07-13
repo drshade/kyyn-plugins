@@ -788,6 +788,8 @@ dependencies = [
  "kindred-plugin-kb",
  "kindred-plugin-salesforce",
  "kindred-plugin-sweep",
+ "ron",
+ "serde",
 ]
 
 [[package]]

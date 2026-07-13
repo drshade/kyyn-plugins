@@ -5,19 +5,109 @@
 
 use kindred_core::plugin::SourcePlugin;
 
+fn plugin_table(name: &str) -> Option<Box<dyn SourcePlugin>> {
+    match name {
+        "sweep" => Some(Box::new(kindred_plugin_sweep::SweepPlugin)),
+        "git-repo" => Some(Box::new(kindred_plugin_git::GitRepoPlugin)),
+        "salesforce" => Some(Box::new(kindred_plugin_salesforce::SalesforcePlugin)),
+        "kb" => Some(Box::new(kindred_plugin_kb::KbPlugin)),
+        "graph-mail" => Some(Box::new(kindred_plugin_graph::GraphMailPlugin)),
+        "graph-calendar" => Some(Box::new(kindred_plugin_graph::GraphCalendarPlugin)),
+        "graph-meetings" => Some(Box::new(kindred_plugin_graph::GraphMeetingsPlugin)),
+        "graph-chats" => Some(Box::new(kindred_plugin_graph::GraphChatsPlugin)),
+        "sharepoint-file" => Some(Box::new(kindred_plugin_graph::SharepointFilePlugin)),
+        _ => None,
+    }
+}
+
 fn main() {
-    kindred_core::plugin::tap_main(|name| -> Option<Box<dyn SourcePlugin>> {
-        match name {
-            "sweep" => Some(Box::new(kindred_plugin_sweep::SweepPlugin)),
-            "git-repo" => Some(Box::new(kindred_plugin_git::GitRepoPlugin)),
-            "salesforce" => Some(Box::new(kindred_plugin_salesforce::SalesforcePlugin)),
-            "kb" => Some(Box::new(kindred_plugin_kb::KbPlugin)),
-            "graph-mail" => Some(Box::new(kindred_plugin_graph::GraphMailPlugin)),
-            "graph-calendar" => Some(Box::new(kindred_plugin_graph::GraphCalendarPlugin)),
-            "graph-meetings" => Some(Box::new(kindred_plugin_graph::GraphMeetingsPlugin)),
-            "graph-chats" => Some(Box::new(kindred_plugin_graph::GraphChatsPlugin)),
-            "sharepoint-file" => Some(Box::new(kindred_plugin_graph::SharepointFilePlugin)),
-            _ => None,
+    kindred_core::plugin::tap_main(plugin_table);
+}
+
+#[cfg(test)]
+mod manifest_drift {
+    use kindred_core::plugin::SourcePlugin;
+    use serde::Deserialize;
+
+    // A tolerant local mirror of the manifest shapes (the published
+    // kindred-core this crate builds against may lag the config-spec
+    // fields; the ENGINE parses strictly).
+    #[derive(Deserialize)]
+    struct Manifest {
+        #[allow(dead_code)]
+        tap: u32,
+        #[allow(dead_code)]
+        binary: String,
+        plugins: Vec<Plugin>,
+    }
+    #[derive(Deserialize)]
+    struct Plugin {
+        name: String,
+        #[serde(default)]
+        config: Vec<Field>,
+    }
+    #[derive(Deserialize, Default)]
+    #[serde(default)]
+    struct Field {
+        name: String,
+        doc: String,
+        ty: Option<String>,
+        required: bool,
+        example: Option<String>,
+        default: Option<String>,
+    }
+
+    /// THE drift guard: every plugin's declared config spec, filled with its
+    /// own examples/defaults, must assemble into a config the plugin's real
+    /// validate_config accepts — a spec that promises a field the code
+    /// rejects (or mistypes) fails here, not in an owner's install form.
+    #[test]
+    fn declared_config_specs_satisfy_the_plugins() {
+        let text = std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/kindred-tap.ron"))
+            .expect("kindred-tap.ron");
+        let manifest: Manifest = ron::from_str(&text).expect("manifest parses");
+        assert_eq!(manifest.plugins.len(), 9);
+        for plugin in &manifest.plugins {
+            let mut parts: Vec<String> = Vec::new();
+            for f in &plugin.config {
+                assert!(
+                    !f.doc.is_empty(),
+                    "{}#{} needs a doc line",
+                    plugin.name,
+                    f.name
+                );
+                let Some(value) = f.example.as_ref().or(f.default.as_ref()) else {
+                    assert!(
+                        !f.required,
+                        "{}#{} is required but has no example",
+                        plugin.name, f.name
+                    );
+                    continue;
+                };
+                let rendered = match f.ty.as_deref() {
+                    Some("Int") | Some("Bool") | Some("Ron") => value.clone(),
+                    Some("StrList") => format!(
+                        "[{}]",
+                        value
+                            .split(',')
+                            .map(|s| format!("{:?}", s.trim()))
+                            .collect::<Vec<_>>()
+                            .join(", ")
+                    ),
+                    _ => format!("{value:?}"),
+                };
+                parts.push(format!("{}: {rendered}", f.name));
+            }
+            let config = format!("({})", parts.join(", "));
+            let result = super::plugin_table(&plugin.name)
+                .unwrap_or_else(|| panic!("manifest advertises unserved plugin '{}'", plugin.name))
+                .validate_config(&config);
+            assert!(
+                result.is_ok(),
+                "{}: spec-assembled config rejected: {:?}\n  config: {config}",
+                plugin.name,
+                result.err()
+            );
         }
-    });
+    }
 }
