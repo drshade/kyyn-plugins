@@ -10,9 +10,11 @@ publish = false
 
 [dependencies]
 kindred-core = "0.1.8"
+kindred-plugin-git = { path = "crates/kindred-plugin-git" }
 kindred-plugin-graph = { path = "crates/kindred-plugin-graph" }
 kindred-plugin-kb = { path = "crates/kindred-plugin-kb" }
+kindred-plugin-salesforce = { path = "crates/kindred-plugin-salesforce" }
 kindred-plugin-sweep = { path = "crates/kindred-plugin-sweep" }
 
 [workspace]
-members = ["crates/kindred-plugin-graph", "crates/kindred-plugin-kb", "crates/kindred-plugin-sweep"]
+members = ["crates/kindred-plugin-git", "crates/kindred-plugin-graph", "crates/kindred-plugin-kb", "crates/kindred-plugin-salesforce", "crates/kindred-plugin-sweep"]

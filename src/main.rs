@@ -9,6 +9,8 @@ fn main() {
     kindred_core::plugin::tap_main(|name| -> Option<Box<dyn SourcePlugin>> {
         match name {
             "sweep" => Some(Box::new(kindred_plugin_sweep::SweepPlugin)),
+            "git-repo" => Some(Box::new(kindred_plugin_git::GitRepoPlugin)),
+            "salesforce" => Some(Box::new(kindred_plugin_salesforce::SalesforcePlugin)),
             "kb" => Some(Box::new(kindred_plugin_kb::KbPlugin)),
             "graph-mail" => Some(Box::new(kindred_plugin_graph::GraphMailPlugin)),
             "graph-calendar" => Some(Box::new(kindred_plugin_graph::GraphCalendarPlugin)),

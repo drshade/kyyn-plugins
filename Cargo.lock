@@ -710,6 +710,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "kindred-plugin-git"
+version = "0.1.0"
+dependencies = [
+ "glob",
+ "kindred-core",
+ "ron",
+ "serde",
+ "sha2",
+ "tempfile",
+]
+
+[[package]]
 name = "kindred-plugin-graph"
 version = "0.1.0"
 dependencies = [
@@ -742,6 +754,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "kindred-plugin-salesforce"
+version = "0.1.0"
+dependencies = [
+ "kindred-core",
+ "reqwest",
+ "ron",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tokio",
+]
+
+[[package]]
 name = "kindred-plugin-sweep"
 version = "0.1.0"
 dependencies = [
@@ -758,8 +783,10 @@ name = "kindred-plugins"
 version = "0.1.0"
 dependencies = [
  "kindred-core",
+ "kindred-plugin-git",
  "kindred-plugin-graph",
  "kindred-plugin-kb",
+ "kindred-plugin-salesforce",
  "kindred-plugin-sweep",
 ]
 
