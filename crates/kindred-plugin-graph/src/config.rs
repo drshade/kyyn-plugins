@@ -42,8 +42,31 @@ pub struct Config {
     /// `contains(subject, 'Sales Update')`. Mail only: calendar, attachments
     /// of matched mail, and transcripts are unaffected. Probe the source to
     /// test an expression before proposing it.
-    #[serde(default)]
+    ///
+    /// Accepts a bare `"…"` or an explicit `Some("…")`: the web install form
+    /// (and every `Str`-typed config field) renders values bare, so an
+    /// optional string field must take both spellings.
+    #[serde(default, deserialize_with = "opt_string_lenient")]
     pub mail_filter: Option<String>,
+}
+
+/// `Option<String>` from a bare string, an explicit `Some(...)`/`None`, or
+/// absent — so form-assembled configs (bare) and hand-written RON
+/// (`Some(...)`) both parse.
+fn opt_string_lenient<'de, D>(d: D) -> Result<Option<String>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum Lenient {
+        Opt(Option<String>),
+        Bare(String),
+    }
+    Ok(match Lenient::deserialize(d)? {
+        Lenient::Opt(o) => o,
+        Lenient::Bare(s) => Some(s),
+    })
 }
 
 impl Config {

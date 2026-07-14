@@ -10,15 +10,16 @@
         (name: "sweep", summary: "Glob a local directory tree into hashed, versioned evidence.",
          namespace: "file",
          config: [
-            (name: "root", doc: "The directory tree to sweep (~ expands).", required: true, example: Some("~/notes")),
+            (name: "root", doc: "The directory tree to sweep (~ expands).", ty: Path, required: true, example: Some("~/notes")),
             (name: "patterns", doc: "Globs relative to root; * stays within one level, ** crosses.", ty: StrList, example: Some("**/*.md"), default: Some("**/*")),
             (name: "kind", doc: "The item kind swept files carry.", default: Some("file")),
             (name: "max_file_bytes", doc: "Per-file size cap; larger files skip with a note.", ty: Int, default: Some("67108864")),
          ]),
         (name: "kb", summary: "Ingest another kindred KB as evidence — federation via curation.",
          namespace: "kb",
+         capabilities: (network: ["(the configured KB remote)"]),
          config: [
-            (name: "url", doc: "Git URL or local path of the remote KB's ontology repo.", required: true, example: Some("git@github.com:team/their-kb.git")),
+            (name: "url", doc: "Git URL or local path of the remote KB's ontology repo.", ty: Path, required: true, example: Some("git@github.com:team/their-kb.git")),
             (name: "git_ref", doc: "Branch or tag to read.", default: Some("main")),
             (name: "include", doc: "Paths swept as evidence, relative to the remote root.", ty: StrList, default: Some("facts/**, receipts/**")),
          ]),
@@ -26,7 +27,7 @@
          namespace: "repo",
          capabilities: (network: ["(the configured git remote)"]),
          config: [
-            (name: "url", doc: "Git URL or local path of the repository.", required: true, example: Some("https://github.com/org/repo")),
+            (name: "url", doc: "Git URL or local path of the repository.", ty: Path, required: true, example: Some("https://github.com/org/repo")),
             (name: "git_ref", doc: "Branch or tag to read; HEAD = the default branch.", default: Some("HEAD")),
             (name: "patterns", doc: "Globs over repo-relative paths, sweep semantics.", ty: StrList, example: Some("docs/**/*.md"), default: Some("**/*")),
             (name: "kind", doc: "The item kind swept files carry.", default: Some("file")),
