@@ -167,7 +167,7 @@ impl GraphClient {
             pages += 1;
             // A long backfill pages for minutes — say so at coarse intervals.
             if pages.is_multiple_of(5) && next.is_some() {
-                kindred_core::progress::report(&format!("{} records ({pages} pages)…", acc.len()));
+                kyyn_core::progress::report(&format!("{} records ({pages} pages)…", acc.len()));
             }
             if pages >= MAX_PAGES {
                 bail!("paging exceeded {MAX_PAGES} pages for {url} — aborting");

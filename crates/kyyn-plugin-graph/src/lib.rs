@@ -14,7 +14,7 @@ pub mod transcript;
 pub mod urls;
 pub mod window;
 
-use kindred_core::plugin::{
+use kyyn_core::plugin::{
     AuthStatus, Context, Describe, FetchRequest, FetchResult, FetchStyle, RunSpec, SourcePlugin,
 };
 
@@ -50,7 +50,7 @@ mod ms_auth {
             ))
         } else {
             Ok(AuthStatus::NotAuthenticated(
-                "no token — sign the realm in (source_auth_begin, or `kindred source auth`)".into(),
+                "no token — sign the realm in (source_auth_begin, or `kyyn source auth`)".into(),
             ))
         }
     }
@@ -67,7 +67,7 @@ mod ms_auth {
         })
     }
 
-    pub fn begin(ctx: &Context) -> Result<kindred_core::plugin::AuthChallenge, String> {
+    pub fn begin(ctx: &Context) -> Result<kyyn_core::plugin::AuthChallenge, String> {
         let cfg = Config::from_ron(&ctx.config).map_err(|e| format!("{e:#}"))?;
         let rt = tokio::runtime::Runtime::new().map_err(|e| e.to_string())?;
         rt.block_on(async {
@@ -75,7 +75,7 @@ mod ms_auth {
             let b = auth::device_begin(&client, &cfg)
                 .await
                 .map_err(|e| format!("{e:#}"))?;
-            Ok(kindred_core::plugin::AuthChallenge {
+            Ok(kyyn_core::plugin::AuthChallenge {
                 verification_url: b.verification_uri,
                 user_code: b.user_code,
                 expires_in_secs: b.expires_in_secs,
@@ -87,17 +87,17 @@ mod ms_auth {
     pub fn poll(
         ctx: &Context,
         handle: &str,
-    ) -> Result<kindred_core::plugin::AuthPollResult, String> {
+    ) -> Result<kyyn_core::plugin::AuthPollResult, String> {
         let cfg = Config::from_ron(&ctx.config).map_err(|e| format!("{e:#}"))?;
         let rt = tokio::runtime::Runtime::new().map_err(|e| e.to_string())?;
         rt.block_on(async {
             let client = reqwest::Client::new();
             match auth::device_poll_once(&client, &cfg, handle, &token_path(ctx)).await {
-                Ok(Some(())) => Ok(kindred_core::plugin::AuthPollResult::Done(
+                Ok(Some(())) => Ok(kyyn_core::plugin::AuthPollResult::Done(
                     "signed in".into(),
                 )),
-                Ok(None) => Ok(kindred_core::plugin::AuthPollResult::Pending),
-                Err(e) => Ok(kindred_core::plugin::AuthPollResult::Failed(format!(
+                Ok(None) => Ok(kyyn_core::plugin::AuthPollResult::Pending),
+                Err(e) => Ok(kyyn_core::plugin::AuthPollResult::Failed(format!(
                     "{e:#}"
                 ))),
             }
@@ -126,14 +126,14 @@ macro_rules! delegate_auth {
         fn authenticate(&self, ctx: &Context) -> Result<(), String> {
             ms_auth::interactive(ctx)
         }
-        fn auth_begin(&self, ctx: &Context) -> Result<kindred_core::plugin::AuthChallenge, String> {
+        fn auth_begin(&self, ctx: &Context) -> Result<kyyn_core::plugin::AuthChallenge, String> {
             ms_auth::begin(ctx)
         }
         fn auth_poll(
             &self,
             ctx: &Context,
             handle: &str,
-        ) -> Result<kindred_core::plugin::AuthPollResult, String> {
+        ) -> Result<kyyn_core::plugin::AuthPollResult, String> {
             ms_auth::poll(ctx, handle)
         }
     };
@@ -149,7 +149,7 @@ impl SourcePlugin for GraphMailPlugin {
             link_namespace: "graph".into(),
             fetch_style: FetchStyle::Windowed,
             auth_realm: Some("ms-graph".into()),
-            protocol: kindred_core::plugin::PROTOCOL,
+            protocol: kyyn_core::plugin::PROTOCOL,
         }
     }
 
@@ -195,7 +195,7 @@ impl SourcePlugin for GraphCalendarPlugin {
             link_namespace: "graph".into(),
             fetch_style: FetchStyle::Windowed,
             auth_realm: Some("ms-graph".into()),
-            protocol: kindred_core::plugin::PROTOCOL,
+            protocol: kyyn_core::plugin::PROTOCOL,
         }
     }
 
@@ -240,7 +240,7 @@ impl SourcePlugin for GraphMeetingsPlugin {
             link_namespace: "graph".into(),
             fetch_style: FetchStyle::Windowed,
             auth_realm: Some("ms-graph".into()),
-            protocol: kindred_core::plugin::PROTOCOL,
+            protocol: kyyn_core::plugin::PROTOCOL,
         }
     }
 
@@ -285,7 +285,7 @@ impl SourcePlugin for GraphChatsPlugin {
             link_namespace: "graph".into(),
             fetch_style: FetchStyle::Windowed,
             auth_realm: Some("ms-graph".into()),
-            protocol: kindred_core::plugin::PROTOCOL,
+            protocol: kyyn_core::plugin::PROTOCOL,
         }
     }
 

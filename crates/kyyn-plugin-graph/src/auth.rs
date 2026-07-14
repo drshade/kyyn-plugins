@@ -119,7 +119,7 @@ pub fn read_token_cache(path: &Path) -> Result<Option<TokenCache>> {
             Ok(cache) => Ok(Some(cache)),
             Err(e) => {
                 eprintln!(
-                    "Warning: token cache unreadable ({e}); sign in again with `kindred source auth <name>`"
+                    "Warning: token cache unreadable ({e}); sign in again with `kyyn source auth <name>`"
                 );
                 Ok(None)
             }
@@ -206,7 +206,7 @@ pub async fn device_login(
     loop {
         tokio::time::sleep(Duration::from_secs(dc.interval)).await;
         if tokio::time::Instant::now() >= deadline {
-            bail!("device code expired — run `kindred source auth <name>` to sign in again");
+            bail!("device code expired — run `kyyn source auth <name>` to sign in again");
         }
         let resp = client
             .post(cfg.token_url())
@@ -262,7 +262,7 @@ pub async fn refresh_access(
         .await?;
     if !resp.status().is_success() {
         bail!(
-            "token refresh failed (HTTP {}) — run `kindred source auth <name>` to sign in again",
+            "token refresh failed (HTTP {}) — run `kyyn source auth <name>` to sign in again",
             resp.status().as_u16()
         );
     }
@@ -290,7 +290,7 @@ pub async fn authed_client(cfg: &Config, token_path: &Path) -> Result<(reqwest::
     // sharing this token (Run All) must serialize refresh-token rotation.
     let _realm = realm_lock(token_path)?;
     let cache = read_token_cache(token_path)?
-        .context("no token cache found — run `kindred source auth <name>` first")?;
+        .context("no token cache found — run `kyyn source auth <name>` first")?;
     let cache = refresh_access(&client, cfg, cache, token_path).await?;
     Ok((client, cache.access_token))
 }

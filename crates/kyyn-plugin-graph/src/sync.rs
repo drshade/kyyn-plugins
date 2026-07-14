@@ -165,7 +165,7 @@ async fn chats_for(
     // couple of minutes); per-chat message fetches after it are quick. Not a
     // bug — wait it out. (The HTTP client timeout is set well above it.)
     let chats: Vec<GraphChat> = graph.fetch_all_pages_soft(&urls::chats_url(wf)).await?;
-    kindred_core::progress::report(&format!(
+    kyyn_core::progress::report(&format!(
         "{} chats active in window; fetching messages…",
         chats.len()
     ));
@@ -198,7 +198,7 @@ pub async fn sync_mail(
     out_dir: &Path,
     wf: DateTime<Utc>,
     wt: DateTime<Utc>,
-) -> Result<Vec<kindred_core::plugin::Item>> {
+) -> Result<Vec<kyyn_core::plugin::Item>> {
     let (http, token) = crate::auth::authed_client(cfg, token_path).await?;
     // Text bodies: Outlook renders HTML→text server-side, so records stay
     // small and readable and we ship no HTML parsing.
@@ -206,13 +206,13 @@ pub async fn sync_mail(
     let mut items = Vec::new();
 
     let mut flagged = emails_for(&graph, cfg, wf, wt).await?;
-    kindred_core::progress::report(&format!("{} messages in window", flagged.len()));
+    kyyn_core::progress::report(&format!("{} messages in window", flagged.len()));
     let with_att = flagged.iter().filter(|(_, a)| *a).count();
     let mut nth = 0usize;
     for (e, has_att) in flagged.iter_mut() {
         if *has_att {
             nth += 1;
-            kindred_core::progress::report(&format!(
+            kyyn_core::progress::report(&format!(
                 "attachments {nth} of {with_att}: {}",
                 e.subject.as_deref().unwrap_or("(no subject)")
             ));
@@ -241,11 +241,11 @@ pub async fn sync_calendar(
     out_dir: &Path,
     wf: DateTime<Utc>,
     wt: DateTime<Utc>,
-) -> Result<Vec<kindred_core::plugin::Item>> {
+) -> Result<Vec<kyyn_core::plugin::Item>> {
     let (http, token) = crate::auth::authed_client(cfg, token_path).await?;
     let graph = GraphClient::new(http, token).with_text_bodies();
     let raw_events = events_for(&graph, wf, wt).await?;
-    kindred_core::progress::report(&format!("{} events in window", raw_events.len()));
+    kyyn_core::progress::report(&format!("{} events in window", raw_events.len()));
     let events: Vec<InboxEvent> = raw_events
         .into_iter()
         .map(|e| to_inbox_event(None, None, e))
@@ -267,11 +267,11 @@ pub async fn sync_meetings(
     out_dir: &Path,
     wf: DateTime<Utc>,
     wt: DateTime<Utc>,
-) -> Result<Vec<kindred_core::plugin::Item>> {
+) -> Result<Vec<kyyn_core::plugin::Item>> {
     let (http, token) = crate::auth::authed_client(cfg, token_path).await?;
     let graph = GraphClient::new(http, token).with_text_bodies();
     let raw_events = events_for(&graph, wf, wt).await?;
-    kindred_core::progress::report(&format!(
+    kyyn_core::progress::report(&format!(
         "{} events in window; checking for transcripts and attendance…",
         raw_events.len()
     ));
@@ -291,7 +291,7 @@ pub async fn sync_meetings(
             })
         })
         .collect();
-    kindred_core::progress::report(&format!(
+    kyyn_core::progress::report(&format!(
         "{} meetings carry artifacts ({} transcripts, {} attendance reports)",
         meetings.len(),
         meetings
@@ -326,11 +326,11 @@ fn record_item<T: Serialize>(
     bundle: &str,
     subject: &Option<String>,
     record: &T,
-) -> Result<kindred_core::plugin::Item> {
+) -> Result<kyyn_core::plugin::Item> {
     use sha2::Digest;
     let canon = serde_json::to_string(record)?;
     let hash = format!("{:x}", sha2::Sha256::digest(canon.as_bytes()));
-    Ok(kindred_core::plugin::Item {
+    Ok(kyyn_core::plugin::Item {
         id: id.to_string(),
         kind: kind.to_string(),
         version: None,
@@ -349,7 +349,7 @@ pub async fn sync_chats(
     out_dir: &Path,
     wf: DateTime<Utc>,
     wt: DateTime<Utc>,
-) -> Result<Vec<kindred_core::plugin::Item>> {
+) -> Result<Vec<kyyn_core::plugin::Item>> {
     let (http, token) = crate::auth::authed_client(cfg, token_path).await?;
     let graph = GraphClient::new(http, token);
     let chats = chats_for(&graph, wf, wt).await?;

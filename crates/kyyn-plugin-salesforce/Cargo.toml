@@ -1,14 +1,14 @@
 [package]
-name = "kindred-plugin-salesforce"
+name = "kyyn-plugin-salesforce"
 version = "0.1.0"
 edition = "2024"
-description = "Salesforce source plugin for kindred: a SOQL query's records as hashed evidence, via a Connected App device-flow sign-in."
+description = "Salesforce source plugin for kyyn: a SOQL query's records as hashed evidence, via a Connected App device-flow sign-in."
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/drshade/kindred-plugins-core"
+repository = "https://github.com/drshade/kyyn-plugins"
 publish = false
 
 [dependencies]
-kindred-core = "0.1.9"
+kyyn-core = "0.1.10"
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 ron = "0.12"
 serde = { version = "1", features = ["derive"] }

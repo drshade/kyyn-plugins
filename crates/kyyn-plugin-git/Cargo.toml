@@ -1,0 +1,16 @@
+[package]
+name = "kyyn-plugin-git"
+version = "0.1.0"
+edition = "2024"
+description = "Git repository source plugin for kyyn: any repo's tree (local or remote) as hashed, versioned evidence."
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/drshade/kyyn-plugins"
+publish = false
+
+[dependencies]
+kyyn-core = "0.1.10"
+glob = "0.3"
+ron = "0.12"
+serde = { version = "1", features = ["derive"] }
+sha2 = "0.10"
+tempfile = "3"

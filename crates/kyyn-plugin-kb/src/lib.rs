@@ -1,4 +1,4 @@
-//! `kb` — federation: another kindred knowledge base's git repository as a
+//! `kb` — federation: another kyyn knowledge base's git repository as a
 //! source. Each record file (and accept receipt) in the remote KB becomes a
 //! hashed, immutable evidence item; the remote `registry.ron` rides along as
 //! an item of its own so the curating agent can read the remote VOCABULARY
@@ -12,11 +12,11 @@
 
 use std::path::Path;
 
-use kindred_core::plugin::{
+use kyyn_core::plugin::{
     AuthStatus, Context, Describe, FetchRequest, FetchResult, FetchStyle, Item, RunSpec,
     SourcePlugin,
 };
-use kindred_core::registry::{Affordance, Registry};
+use kyyn_core::registry::{Affordance, Registry};
 use serde::Deserialize;
 use sha2::Digest;
 
@@ -62,7 +62,7 @@ impl SourcePlugin for KbPlugin {
             link_namespace: "kb".into(),
             fetch_style: FetchStyle::Sweep,
             auth_realm: None,
-            protocol: kindred_core::plugin::PROTOCOL,
+            protocol: kyyn_core::plugin::PROTOCOL,
         }
     }
 

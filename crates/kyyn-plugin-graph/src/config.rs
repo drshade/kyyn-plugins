@@ -5,7 +5,7 @@
 use anyhow::{Context, Result};
 use serde::Deserialize;
 
-/// The shared "kindred" app registration — MULTI-TENANT and a public client
+/// The shared "kyyn" app registration — MULTI-TENANT and a public client
 /// (device-code flow; a client id is not a secret), so any org's users sign
 /// in with it after their tenant consents. Overridable per instance for
 /// orgs that register their own app.
@@ -26,7 +26,7 @@ fn default_tenant() -> String {
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Config {
-    /// Azure app (client) id. Default: the shared multi-tenant "kindred"
+    /// Azure app (client) id. Default: the shared multi-tenant "kyyn"
     /// registration — set both this and `tenant` to use your org's own.
     #[serde(default = "default_client_id")]
     pub client_id: String,

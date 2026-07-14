@@ -1,27 +1,27 @@
-//! The first-party tap binary — every kindred-plugin-* crate served over
-//! the tap harness (`kindred-plugins --plugin <name>`, one RON request on
+//! The first-party tap binary — every kyyn-plugin-* crate served over
+//! the tap harness (`kyyn-plugins --plugin <name>`, one RON request on
 //! stdin, one RON response on stdout). This is the same machinery any
 //! third-party tap uses: first-party plugins are not special (ADR 0005).
 
-use kindred_core::plugin::SourcePlugin;
+use kyyn_core::plugin::SourcePlugin;
 
 fn plugin_table(name: &str) -> Option<Box<dyn SourcePlugin>> {
     match name {
-        "sweep" => Some(Box::new(kindred_plugin_sweep::SweepPlugin)),
-        "git-repo" => Some(Box::new(kindred_plugin_git::GitRepoPlugin)),
-        "salesforce" => Some(Box::new(kindred_plugin_salesforce::SalesforcePlugin)),
-        "kb" => Some(Box::new(kindred_plugin_kb::KbPlugin)),
-        "graph-mail" => Some(Box::new(kindred_plugin_graph::GraphMailPlugin)),
-        "graph-calendar" => Some(Box::new(kindred_plugin_graph::GraphCalendarPlugin)),
-        "graph-meetings" => Some(Box::new(kindred_plugin_graph::GraphMeetingsPlugin)),
-        "graph-chats" => Some(Box::new(kindred_plugin_graph::GraphChatsPlugin)),
-        "sharepoint-file" => Some(Box::new(kindred_plugin_graph::SharepointFilePlugin)),
+        "sweep" => Some(Box::new(kyyn_plugin_sweep::SweepPlugin)),
+        "git-repo" => Some(Box::new(kyyn_plugin_git::GitRepoPlugin)),
+        "salesforce" => Some(Box::new(kyyn_plugin_salesforce::SalesforcePlugin)),
+        "kb" => Some(Box::new(kyyn_plugin_kb::KbPlugin)),
+        "graph-mail" => Some(Box::new(kyyn_plugin_graph::GraphMailPlugin)),
+        "graph-calendar" => Some(Box::new(kyyn_plugin_graph::GraphCalendarPlugin)),
+        "graph-meetings" => Some(Box::new(kyyn_plugin_graph::GraphMeetingsPlugin)),
+        "graph-chats" => Some(Box::new(kyyn_plugin_graph::GraphChatsPlugin)),
+        "sharepoint-file" => Some(Box::new(kyyn_plugin_graph::SharepointFilePlugin)),
         _ => None,
     }
 }
 
 fn main() {
-    kindred_core::plugin::tap_main(plugin_table);
+    kyyn_core::plugin::tap_main(plugin_table);
 }
 
 #[cfg(test)]
@@ -29,7 +29,7 @@ mod manifest_drift {
     use serde::Deserialize;
 
     // A tolerant local mirror of the manifest shapes (the published
-    // kindred-core this crate builds against may lag the config-spec
+    // kyyn-core this crate builds against may lag the config-spec
     // fields; the ENGINE parses strictly).
     #[derive(Deserialize)]
     struct Manifest {
@@ -55,7 +55,7 @@ mod manifest_drift {
         example: Option<String>,
         default: Option<String>,
     }
-    // Mirrors kindred_core::tap::TapConfigType (bare enum variant, not a
+    // Mirrors kyyn_core::tap::TapConfigType (bare enum variant, not a
     // string) so the manifest parses the way the engine parses it. Path is
     // a host-read capability declaration; it quotes like Str.
     #[derive(Deserialize, Default, PartialEq)]
@@ -75,8 +75,8 @@ mod manifest_drift {
     /// rejects (or mistypes) fails here, not in an owner's install form.
     #[test]
     fn declared_config_specs_satisfy_the_plugins() {
-        let text = std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/kindred-tap.ron"))
-            .expect("kindred-tap.ron");
+        let text = std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/kyyn-tap.ron"))
+            .expect("kyyn-tap.ron");
         let manifest: Manifest = ron::from_str(&text).expect("manifest parses");
         assert_eq!(manifest.plugins.len(), 9);
         for plugin in &manifest.plugins {

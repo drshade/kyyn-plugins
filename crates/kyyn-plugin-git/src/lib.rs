@@ -9,7 +9,7 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use kindred_core::plugin::{
+use kyyn_core::plugin::{
     AuthStatus, Context, Describe, FetchRequest, FetchResult, FetchStyle, Item, RunSpec,
     SourcePlugin,
 };
@@ -98,7 +98,7 @@ impl SourcePlugin for GitRepoPlugin {
             link_namespace: "repo".into(),
             fetch_style: FetchStyle::Snapshot,
             auth_realm: None,
-            protocol: kindred_core::plugin::PROTOCOL,
+            protocol: kyyn_core::plugin::PROTOCOL,
         }
     }
 
@@ -148,7 +148,7 @@ impl SourcePlugin for GitRepoPlugin {
                 next_checkpoint: Some(head),
             });
         }
-        kindred_core::progress::report(&format!("cloning {} at {short}…", config.url));
+        kyyn_core::progress::report(&format!("cloning {} at {short}…", config.url));
         let tmp = tempfile::tempdir().map_err(|e| e.to_string())?;
         let clone_dir = tmp.path().join("repo");
         let mut clone = Command::new("git");
@@ -222,7 +222,7 @@ impl SourcePlugin for GitRepoPlugin {
                 meta: format!("{rel} · {short}"),
             });
         }
-        kindred_core::progress::report(&format!("{} file(s) matched at {short}", items.len()));
+        kyyn_core::progress::report(&format!("{} file(s) matched at {short}", items.len()));
         notes.insert(0, format!("tree at {short}"));
         Ok(FetchResult {
             items,

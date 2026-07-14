@@ -1,17 +1,17 @@
 [package]
-name = "kindred-plugin-graph"
+name = "kyyn-plugin-graph"
 version = "0.1.0"
 edition = "2024"
-description = "Microsoft Graph source plugin for kindred: mail, calendar, Teams chats, transcripts and attachments as hashed evidence."
+description = "Microsoft Graph source plugin for kyyn: mail, calendar, Teams chats, transcripts and attachments as hashed evidence."
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/drshade/kindred-plugins-core"
+repository = "https://github.com/drshade/kyyn-plugins"
 
 publish = false
 
 [dependencies]
 sha2 = "0.10"
 libc = "0.2"
-kindred-core = "0.1.9"
+kyyn-core = "0.1.10"
 anyhow = "1"
 base64 = "0.22"
 chrono = { version = "0.4", features = ["serde"] }

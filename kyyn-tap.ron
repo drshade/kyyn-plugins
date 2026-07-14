@@ -1,11 +1,11 @@
-// The first-party kindred tap — advertised plugins and the binary serving
-// them (`kindred-plugins --plugin <name>`, one RON request per invocation).
+// The first-party kyyn tap — advertised plugins and the binary serving
+// them (`kyyn-plugins --plugin <name>`, one RON request per invocation).
 // Each plugin's `config` block drives the web install form; a drift test in
 // src/main.rs proves every example assembles into a config the plugin
 // actually accepts.
 (
     tap: 1,
-    binary: "kindred-plugins",
+    binary: "kyyn-plugins",
     plugins: [
         (name: "sweep", summary: "Glob a local directory tree into hashed, versioned evidence.",
          namespace: "file",
@@ -15,7 +15,7 @@
             (name: "kind", doc: "The item kind swept files carry.", default: Some("file")),
             (name: "max_file_bytes", doc: "Per-file size cap; larger files skip with a note.", ty: Int, default: Some("67108864")),
          ]),
-        (name: "kb", summary: "Ingest another kindred KB as evidence — federation via curation.",
+        (name: "kb", summary: "Ingest another kyyn KB as evidence — federation via curation.",
          namespace: "kb",
          capabilities: (network: ["(the configured KB remote)"]),
          config: [
@@ -50,7 +50,7 @@
          config: [
             (name: "mail_filter", doc: "OData $filter fragment ANDed onto the mail window — e.g. from/emailAddress/address eq 'x@y.com'.", example: Some("contains(subject, 'Sales Update')")),
             (name: "owner_addresses", doc: "Your own addresses (lowercased) — classifies sent vs received.", ty: StrList, example: Some("you@company.com")),
-            (name: "client_id", doc: "Azure app id — leave empty for the shared multi-tenant kindred app.", default: Some("53ddb21b-849f-45a3-8168-8a0e555f386f")),
+            (name: "client_id", doc: "Azure app id — leave empty for the shared multi-tenant kyyn app.", default: Some("53ddb21b-849f-45a3-8168-8a0e555f386f")),
             (name: "tenant", doc: "Entra tenant GUID, or organizations (any work/school directory).", default: Some("organizations")),
          ]),
         (name: "graph-calendar", summary: "Microsoft 365 calendar events.",
@@ -58,7 +58,7 @@
          capabilities: (network: ["graph.microsoft.com", "login.microsoftonline.com"], auth: Some("ms-graph")),
          config: [
             (name: "owner_addresses", doc: "Your own addresses (lowercased).", ty: StrList, example: Some("you@company.com")),
-            (name: "client_id", doc: "Azure app id — leave empty for the shared multi-tenant kindred app.", default: Some("53ddb21b-849f-45a3-8168-8a0e555f386f")),
+            (name: "client_id", doc: "Azure app id — leave empty for the shared multi-tenant kyyn app.", default: Some("53ddb21b-849f-45a3-8168-8a0e555f386f")),
             (name: "tenant", doc: "Entra tenant GUID, or organizations.", default: Some("organizations")),
          ]),
         (name: "graph-meetings", summary: "Teams meetings that carry transcripts or attendance reports.",
@@ -66,7 +66,7 @@
          capabilities: (network: ["graph.microsoft.com", "login.microsoftonline.com"], auth: Some("ms-graph")),
          config: [
             (name: "owner_addresses", doc: "Your own addresses (lowercased).", ty: StrList, example: Some("you@company.com")),
-            (name: "client_id", doc: "Azure app id — leave empty for the shared multi-tenant kindred app.", default: Some("53ddb21b-849f-45a3-8168-8a0e555f386f")),
+            (name: "client_id", doc: "Azure app id — leave empty for the shared multi-tenant kyyn app.", default: Some("53ddb21b-849f-45a3-8168-8a0e555f386f")),
             (name: "tenant", doc: "Entra tenant GUID, or organizations.", default: Some("organizations")),
          ]),
         (name: "graph-chats", summary: "Teams chats and their messages (the slow crawl).",
@@ -74,7 +74,7 @@
          capabilities: (network: ["graph.microsoft.com", "login.microsoftonline.com"], auth: Some("ms-graph")),
          config: [
             (name: "owner_addresses", doc: "Your own addresses (lowercased).", ty: StrList, example: Some("you@company.com")),
-            (name: "client_id", doc: "Azure app id — leave empty for the shared multi-tenant kindred app.", default: Some("53ddb21b-849f-45a3-8168-8a0e555f386f")),
+            (name: "client_id", doc: "Azure app id — leave empty for the shared multi-tenant kyyn app.", default: Some("53ddb21b-849f-45a3-8168-8a0e555f386f")),
             (name: "tenant", doc: "Entra tenant GUID, or organizations.", default: Some("organizations")),
          ]),
         (name: "sharepoint-file", summary: "A tracked SharePoint/OneDrive file or folder, snapshot-fetched.",
@@ -85,7 +85,7 @@
             (name: "patterns", doc: "Folder targets: globs over folder-relative paths.", ty: StrList, example: Some("**/*.xlsx"), default: Some("**/*")),
             (name: "kind", doc: "The item kind fetched files carry.", default: Some("file")),
             (name: "max_file_bytes", doc: "Per-file size cap; larger files skip with a note.", ty: Int, default: Some("67108864")),
-            (name: "client_id", doc: "Azure app id — leave empty for the shared multi-tenant kindred app.", default: Some("53ddb21b-849f-45a3-8168-8a0e555f386f")),
+            (name: "client_id", doc: "Azure app id — leave empty for the shared multi-tenant kyyn app.", default: Some("53ddb21b-849f-45a3-8168-8a0e555f386f")),
             (name: "tenant", doc: "Entra tenant GUID, or organizations.", default: Some("organizations")),
          ]),
     ],

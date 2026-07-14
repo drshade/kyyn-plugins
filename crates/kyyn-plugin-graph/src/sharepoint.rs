@@ -9,7 +9,7 @@ use std::collections::BTreeMap;
 
 use base64::Engine;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
-use kindred_core::plugin::{
+use kyyn_core::plugin::{
     AuthStatus, Context, Describe, FetchRequest, FetchResult, FetchStyle, Item, RunSpec,
     SourcePlugin,
 };
@@ -29,7 +29,7 @@ pub struct SharepointFilePlugin;
 struct SpConfig {
     /// The sharing link of the tracked file or folder.
     url: String,
-    /// Azure app (client) id — default: the shared multi-tenant "kindred"
+    /// Azure app (client) id — default: the shared multi-tenant "kyyn"
     /// registration (see [`crate::config::DEFAULT_CLIENT_ID`]).
     #[serde(default = "default_client_id")]
     client_id: String,
@@ -81,7 +81,7 @@ impl SourcePlugin for SharepointFilePlugin {
             link_namespace: "sharepoint".into(),
             fetch_style: FetchStyle::Snapshot,
             auth_realm: Some("ms-graph".into()),
-            protocol: kindred_core::plugin::PROTOCOL,
+            protocol: kyyn_core::plugin::PROTOCOL,
         }
     }
 
@@ -111,7 +111,7 @@ impl SourcePlugin for SharepointFilePlugin {
             ))
         } else {
             Ok(AuthStatus::NotAuthenticated(
-                "no token — run `kindred source auth <name>`".into(),
+                "no token — run `kyyn source auth <name>`".into(),
             ))
         }
     }
@@ -129,7 +129,7 @@ impl SourcePlugin for SharepointFilePlugin {
         })
     }
 
-    fn auth_begin(&self, ctx: &Context) -> Result<kindred_core::plugin::AuthChallenge, String> {
+    fn auth_begin(&self, ctx: &Context) -> Result<kyyn_core::plugin::AuthChallenge, String> {
         let sp: SpConfig = parse_config(&ctx.config)?;
         let cfg = graph_config(&sp);
         let rt = tokio::runtime::Runtime::new().map_err(|e| e.to_string())?;
@@ -138,7 +138,7 @@ impl SourcePlugin for SharepointFilePlugin {
             let b = crate::auth::device_begin(&client, &cfg)
                 .await
                 .map_err(|e| format!("{e:#}"))?;
-            Ok(kindred_core::plugin::AuthChallenge {
+            Ok(kyyn_core::plugin::AuthChallenge {
                 verification_url: b.verification_uri,
                 user_code: b.user_code,
                 expires_in_secs: b.expires_in_secs,
@@ -151,7 +151,7 @@ impl SourcePlugin for SharepointFilePlugin {
         &self,
         ctx: &Context,
         handle: &str,
-    ) -> Result<kindred_core::plugin::AuthPollResult, String> {
+    ) -> Result<kyyn_core::plugin::AuthPollResult, String> {
         let sp: SpConfig = parse_config(&ctx.config)?;
         let cfg = graph_config(&sp);
         let rt = tokio::runtime::Runtime::new().map_err(|e| e.to_string())?;
@@ -165,11 +165,11 @@ impl SourcePlugin for SharepointFilePlugin {
             )
             .await
             {
-                Ok(Some(())) => Ok(kindred_core::plugin::AuthPollResult::Done(
+                Ok(Some(())) => Ok(kyyn_core::plugin::AuthPollResult::Done(
                     "signed in".into(),
                 )),
-                Ok(None) => Ok(kindred_core::plugin::AuthPollResult::Pending),
-                Err(e) => Ok(kindred_core::plugin::AuthPollResult::Failed(format!(
+                Ok(None) => Ok(kyyn_core::plugin::AuthPollResult::Pending),
+                Err(e) => Ok(kyyn_core::plugin::AuthPollResult::Failed(format!(
                     "{e:#}"
                 ))),
             }

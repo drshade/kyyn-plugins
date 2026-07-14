@@ -11,7 +11,7 @@
 
 use std::path::Path;
 
-use kindred_core::plugin::{
+use kyyn_core::plugin::{
     AuthChallenge, AuthPollResult, AuthStatus, Context, Describe, FetchRequest, FetchResult,
     FetchStyle, Item, RunSpec, SourcePlugin,
 };
@@ -101,7 +101,7 @@ impl SourcePlugin for SalesforcePlugin {
             link_namespace: "sf".into(),
             fetch_style: FetchStyle::Snapshot,
             auth_realm: Some("salesforce".into()),
-            protocol: kindred_core::plugin::PROTOCOL,
+            protocol: kyyn_core::plugin::PROTOCOL,
         }
     }
 
@@ -143,7 +143,7 @@ impl SourcePlugin for SalesforcePlugin {
             ))
         } else {
             Ok(AuthStatus::NotAuthenticated(
-                "no token — sign the realm in (source_auth_begin, or `kindred source auth`)".into(),
+                "no token — sign the realm in (source_auth_begin, or `kyyn source auth`)".into(),
             ))
         }
     }
@@ -334,13 +334,13 @@ async fn run_query(c: &Config, req: &FetchRequest) -> Result<FetchResult, String
             .map(|p| format!("{}{}", c.instance_url, p));
         pages += 1;
         if next.is_some() {
-            kindred_core::progress::report(&format!("{} records ({pages} pages)…", records.len()));
+            kyyn_core::progress::report(&format!("{} records ({pages} pages)…", records.len()));
         }
         if pages >= 500 {
             return Err("paging exceeded 500 pages — narrow the query".into());
         }
     }
-    kindred_core::progress::report(&format!("{} records returned", records.len()));
+    kyyn_core::progress::report(&format!("{} records returned", records.len()));
 
     std::fs::create_dir_all(&req.out_dir).map_err(|e| e.to_string())?;
     std::fs::write(

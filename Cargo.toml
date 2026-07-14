@@ -1,24 +1,24 @@
-# The first-party kindred tap: sweep, kb, and the Microsoft Graph family,
+# The first-party kyyn tap: sweep, kb, and the Microsoft Graph family,
 # served over the tap harness. This repo is never published to crates.io —
 # KBs pin it (repo, rev) in sources.ron and build it on first use.
 [package]
-name = "kindred-plugins"
+name = "kyyn-plugins"
 version = "0.1.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 publish = false
 
 [dependencies]
-kindred-core = "0.1.9"
-kindred-plugin-git = { path = "crates/kindred-plugin-git" }
-kindred-plugin-graph = { path = "crates/kindred-plugin-graph" }
-kindred-plugin-kb = { path = "crates/kindred-plugin-kb" }
-kindred-plugin-salesforce = { path = "crates/kindred-plugin-salesforce" }
-kindred-plugin-sweep = { path = "crates/kindred-plugin-sweep" }
+kyyn-core = "0.1.10"
+kyyn-plugin-git = { path = "crates/kyyn-plugin-git" }
+kyyn-plugin-graph = { path = "crates/kyyn-plugin-graph" }
+kyyn-plugin-kb = { path = "crates/kyyn-plugin-kb" }
+kyyn-plugin-salesforce = { path = "crates/kyyn-plugin-salesforce" }
+kyyn-plugin-sweep = { path = "crates/kyyn-plugin-sweep" }
 
 [dev-dependencies]
 ron = "0.12"
 serde = { version = "1", features = ["derive"] }
 
 [workspace]
-members = ["crates/kindred-plugin-git", "crates/kindred-plugin-graph", "crates/kindred-plugin-kb", "crates/kindred-plugin-salesforce", "crates/kindred-plugin-sweep"]
+members = ["crates/kyyn-plugin-git", "crates/kyyn-plugin-graph", "crates/kyyn-plugin-kb", "crates/kyyn-plugin-salesforce", "crates/kyyn-plugin-sweep"]

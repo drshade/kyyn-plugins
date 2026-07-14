@@ -8,7 +8,7 @@
 
 use std::path::{Path, PathBuf};
 
-use kindred_core::plugin::{
+use kyyn_core::plugin::{
     AuthStatus, Context, Describe, FetchRequest, FetchResult, FetchStyle, Item, RunSpec,
     SourcePlugin,
 };
@@ -77,7 +77,7 @@ impl SourcePlugin for SweepPlugin {
             link_namespace: "file".into(),
             fetch_style: FetchStyle::Sweep,
             auth_realm: None,
-            protocol: kindred_core::plugin::PROTOCOL,
+            protocol: kyyn_core::plugin::PROTOCOL,
         }
     }
 

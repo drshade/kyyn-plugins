@@ -1,0 +1,19 @@
+[package]
+name = "kyyn-plugin-sweep"
+version = "0.1.0"
+edition = "2024"
+description = "Generic file-sweep source plugin for kyyn: glob a directory tree into hashed, immutable evidence."
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/drshade/kyyn-plugins"
+
+publish = false
+
+[dependencies]
+kyyn-core = "0.1.10"
+serde = { version = "1", features = ["derive"] }
+ron = "0.12"
+sha2 = "0.10"
+glob = "0.3"
+
+[dev-dependencies]
+tempfile = "3"
