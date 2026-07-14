@@ -9,7 +9,7 @@ license = "MIT OR Apache-2.0"
 publish = false
 
 [dependencies]
-kindred-core = "0.1.8"
+kindred-core = "0.1.9"
 kindred-plugin-git = { path = "crates/kindred-plugin-git" }
 kindred-plugin-graph = { path = "crates/kindred-plugin-graph" }
 kindred-plugin-kb = { path = "crates/kindred-plugin-kb" }

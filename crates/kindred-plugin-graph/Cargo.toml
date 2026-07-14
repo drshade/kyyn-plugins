@@ -11,7 +11,7 @@ publish = false
 [dependencies]
 sha2 = "0.10"
 libc = "0.2"
-kindred-core = "0.1.8"
+kindred-core = "0.1.9"
 anyhow = "1"
 base64 = "0.22"
 chrono = { version = "0.4", features = ["serde"] }

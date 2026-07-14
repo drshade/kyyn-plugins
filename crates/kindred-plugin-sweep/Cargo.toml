@@ -9,7 +9,7 @@ repository = "https://github.com/drshade/kindred-plugins-core"
 publish = false
 
 [dependencies]
-kindred-core = "0.1.8"
+kindred-core = "0.1.9"
 serde = { version = "1", features = ["derive"] }
 ron = "0.12"
 sha2 = "0.10"

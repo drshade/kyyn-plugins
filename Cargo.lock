@@ -697,9 +697,9 @@ dependencies = [
 
 [[package]]
 name = "kindred-core"
-version = "0.1.8"
+version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d401680187a4e3b9d7702c81d63f31b135be994ee44ab1f5be8dfb9059cb537d"
+checksum = "5ef300503f8a372569a754befca9c52550f910a8e41d6057ada6f73f1a50630b"
 dependencies = [
  "chrono",
  "ron",
