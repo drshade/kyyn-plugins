@@ -755,6 +755,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "kyyn-plugin-pack"
+version = "0.1.0"
+dependencies = [
+ "kyyn-core",
+ "ron",
+ "serde",
+ "sha2",
+ "tempfile",
+]
+
+[[package]]
 name = "kyyn-plugin-salesforce"
 version = "0.1.0"
 dependencies = [
@@ -787,6 +798,7 @@ dependencies = [
  "kyyn-plugin-git",
  "kyyn-plugin-graph",
  "kyyn-plugin-kb",
+ "kyyn-plugin-pack",
  "kyyn-plugin-salesforce",
  "kyyn-plugin-sweep",
  "ron",

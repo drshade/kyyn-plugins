@@ -11,6 +11,7 @@ fn plugin_table(name: &str) -> Option<Box<dyn SourcePlugin>> {
         "git-repo" => Some(Box::new(kyyn_plugin_git::GitRepoPlugin)),
         "salesforce" => Some(Box::new(kyyn_plugin_salesforce::SalesforcePlugin)),
         "kb" => Some(Box::new(kyyn_plugin_kb::KbPlugin)),
+        "pack" => Some(Box::new(kyyn_plugin_pack::PackPlugin)),
         "graph-mail" => Some(Box::new(kyyn_plugin_graph::GraphMailPlugin)),
         "graph-calendar" => Some(Box::new(kyyn_plugin_graph::GraphCalendarPlugin)),
         "graph-meetings" => Some(Box::new(kyyn_plugin_graph::GraphMeetingsPlugin)),
@@ -78,7 +79,7 @@ mod manifest_drift {
         let text = std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/kyyn-tap.ron"))
             .expect("kyyn-tap.ron");
         let manifest: Manifest = ron::from_str(&text).expect("manifest parses");
-        assert_eq!(manifest.plugins.len(), 9);
+        assert_eq!(manifest.plugins.len(), 10);
         for plugin in &manifest.plugins {
             let mut parts: Vec<String> = Vec::new();
             for f in &plugin.config {

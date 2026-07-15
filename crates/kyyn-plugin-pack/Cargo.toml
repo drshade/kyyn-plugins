@@ -1,0 +1,15 @@
+[package]
+name = "kyyn-plugin-pack"
+version = "0.1.0"
+edition = "2024"
+description = "Pack source plugin for kyyn: a KB template at a pinned rev, imported as hashed evidence for agent-curated adoption."
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/drshade/kyyn-plugins"
+publish = false
+
+[dependencies]
+kyyn-core = "0.1.11"
+ron = "0.12"
+serde = { version = "1", features = ["derive"] }
+sha2 = "0.10"
+tempfile = "3"

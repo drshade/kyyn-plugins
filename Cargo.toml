@@ -13,6 +13,7 @@ kyyn-core = "0.1.11"
 kyyn-plugin-git = { path = "crates/kyyn-plugin-git" }
 kyyn-plugin-graph = { path = "crates/kyyn-plugin-graph" }
 kyyn-plugin-kb = { path = "crates/kyyn-plugin-kb" }
+kyyn-plugin-pack = { path = "crates/kyyn-plugin-pack" }
 kyyn-plugin-salesforce = { path = "crates/kyyn-plugin-salesforce" }
 kyyn-plugin-sweep = { path = "crates/kyyn-plugin-sweep" }
 
@@ -21,4 +22,4 @@ ron = "0.12"
 serde = { version = "1", features = ["derive"] }
 
 [workspace]
-members = ["crates/kyyn-plugin-git", "crates/kyyn-plugin-graph", "crates/kyyn-plugin-kb", "crates/kyyn-plugin-salesforce", "crates/kyyn-plugin-sweep"]
+members = ["crates/kyyn-plugin-git", "crates/kyyn-plugin-graph", "crates/kyyn-plugin-kb", "crates/kyyn-plugin-pack", "crates/kyyn-plugin-salesforce", "crates/kyyn-plugin-sweep"]
