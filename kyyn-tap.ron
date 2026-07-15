@@ -39,7 +39,7 @@
          config: [
             (name: "template", doc: "The template directory to import (e.g. gbrain).", required: true, example: Some("gbrain")),
             (name: "rev", doc: "Full 40-hex commit OID of the templates repo — bump by proposal to take updates.", required: true, example: Some("90fd6c9f3288717e2de0572a8f33d653661b32cf")),
-            (name: "repo", doc: "Templates repository.", default: Some("https://github.com/drshade/kyyn-templates")),
+            (name: "repo", doc: "Templates repository (public URL, or a local path for development).", ty: Path, default: Some("https://github.com/drshade/kyyn-templates")),
          ]),
         (name: "salesforce", summary: "A SOQL query's records as evidence, via a Connected App device-flow sign-in.",
          namespace: "sf",
