@@ -39,6 +39,21 @@ fn write_records<T: Serialize>(path: &Path, records: &[T]) -> Result<usize> {
     Ok(records.len())
 }
 
+/// Attach a SECONDARY file (a transcript, an attendance report, an
+/// attachment) to an item WITH its sha256 — the engine refuses a fetch
+/// whose secondary files carry no digest (per-file evidence hashes,
+/// ADR 0006). The file must already sit at `out_dir/rel`.
+fn push_secondary(item: &mut kyyn_core::plugin::Item, out_dir: &Path, rel: &str) -> Result<()> {
+    use sha2::Digest;
+    let bytes = std::fs::read(out_dir.join(rel))?;
+    item.file_hashes.insert(
+        rel.to_string(),
+        format!("{:x}", sha2::Sha256::digest(&bytes)),
+    );
+    item.files.push(rel.to_string());
+    Ok(())
+}
+
 // ── Reusable fetch cores ──
 
 /// Mail in the window, normalized and newest-first, each flagged with
@@ -225,7 +240,7 @@ pub async fn sync_mail(
         let mut item = record_item("email", &e.id, "emails.json", &e.subject, e)?;
         for a in &e.attachments {
             if let Some(f) = &a.file {
-                item.files.push(format!("attachments/{f}"));
+                push_secondary(&mut item, out_dir, &format!("attachments/{f}"))?;
             }
         }
         items.push(item);
@@ -308,10 +323,10 @@ pub async fn sync_meetings(
     for m in &meetings {
         let mut item = record_item("meeting", &m.id, "meetings.json", &m.subject, m)?;
         if let Some(t) = &m.transcript_file {
-            item.files.push(t.clone());
+            push_secondary(&mut item, out_dir, t)?;
         }
         if let Some(a) = &m.attendance_file {
-            item.files.push(a.clone());
+            push_secondary(&mut item, out_dir, a)?;
         }
         items.push(item);
     }
@@ -337,6 +352,7 @@ fn record_item<T: Serialize>(
         content_hash: hash,
         files: vec![bundle.to_string()],
         locator: Some(id.to_string()),
+        file_hashes: Default::default(),
         meta: subject.clone().unwrap_or_default(),
     })
 }

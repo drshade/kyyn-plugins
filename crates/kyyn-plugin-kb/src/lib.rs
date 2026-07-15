@@ -241,6 +241,7 @@ fn emit(
         content_hash: format!("{:x}", sha2::Sha256::digest(bytes)),
         files: vec![rel.to_string()],
         locator: None,
+        file_hashes: Default::default(),
         meta,
     })
 }

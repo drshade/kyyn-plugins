@@ -173,6 +173,7 @@ impl SourcePlugin for SweepPlugin {
                 content_hash: hash,
                 files: vec![rel.clone()],
                 locator: None,
+                file_hashes: Default::default(),
                 // The ORIGINAL path and mtime ride along — filenames carry
                 // information the agent should see.
                 meta: format!("{} · modified {}", path.display(), modified),

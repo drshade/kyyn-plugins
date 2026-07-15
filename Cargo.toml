@@ -9,7 +9,7 @@ license = "MIT OR Apache-2.0"
 publish = false
 
 [dependencies]
-kyyn-core = "0.1.10"
+kyyn-core = "0.1.11"
 kyyn-plugin-git = { path = "crates/kyyn-plugin-git" }
 kyyn-plugin-graph = { path = "crates/kyyn-plugin-graph" }
 kyyn-plugin-kb = { path = "crates/kyyn-plugin-kb" }

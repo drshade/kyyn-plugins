@@ -334,6 +334,7 @@ async fn snapshot_file(
             content_hash,
             files: vec![name.clone()],
             locator: None,
+            file_hashes: Default::default(),
             meta: format!(
                 "{name} · {} bytes · modified {}",
                 bytes.len(),
@@ -464,6 +465,7 @@ async fn snapshot_folder(
             content_hash,
             files: vec![rel.clone()],
             locator: None,
+            file_hashes: Default::default(),
             meta: format!(
                 "{rel} · {} bytes · modified {}",
                 bytes.len(),

@@ -697,9 +697,9 @@ dependencies = [
 
 [[package]]
 name = "kyyn-core"
-version = "0.1.10"
+version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "65e634161142b2237772b59b107a912cd751b308b2c089b9ece9c2d6e84ba535"
+checksum = "30311cf3bf4b03df41288ab83649574b0c6e5c0ac34337be51b8d97420286155"
 dependencies = [
  "chrono",
  "ron",
@@ -707,6 +707,7 @@ dependencies = [
  "schemars",
  "serde",
  "serde_json",
+ "sha2",
 ]
 
 [[package]]

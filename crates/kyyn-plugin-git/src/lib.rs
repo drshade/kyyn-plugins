@@ -219,6 +219,7 @@ impl SourcePlugin for GitRepoPlugin {
                 content_hash: hash,
                 files: vec![rel.clone()],
                 locator: None,
+                file_hashes: Default::default(),
                 meta: format!("{rel} · {short}"),
             });
         }

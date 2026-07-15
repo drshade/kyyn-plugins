@@ -367,6 +367,7 @@ async fn run_query(c: &Config, req: &FetchRequest) -> Result<FetchResult, String
             content_hash: format!("{:x}", sha2::Sha256::digest(canon.as_bytes())),
             files: vec!["records.json".into()],
             locator: Some(id),
+            file_hashes: Default::default(),
             meta: format!("{sobject} · {name}"),
         });
     }

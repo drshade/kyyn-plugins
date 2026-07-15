@@ -8,7 +8,7 @@ repository = "https://github.com/drshade/kyyn-plugins"
 publish = false
 
 [dependencies]
-kyyn-core = "0.1.10"
+kyyn-core = "0.1.11"
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 ron = "0.12"
 serde = { version = "1", features = ["derive"] }
