@@ -84,22 +84,15 @@ mod ms_auth {
         })
     }
 
-    pub fn poll(
-        ctx: &Context,
-        handle: &str,
-    ) -> Result<kyyn_core::plugin::AuthPollResult, String> {
+    pub fn poll(ctx: &Context, handle: &str) -> Result<kyyn_core::plugin::AuthPollResult, String> {
         let cfg = Config::from_ron(&ctx.config).map_err(|e| format!("{e:#}"))?;
         let rt = tokio::runtime::Runtime::new().map_err(|e| e.to_string())?;
         rt.block_on(async {
             let client = reqwest::Client::new();
             match auth::device_poll_once(&client, &cfg, handle, &token_path(ctx)).await {
-                Ok(Some(())) => Ok(kyyn_core::plugin::AuthPollResult::Done(
-                    "signed in".into(),
-                )),
+                Ok(Some(())) => Ok(kyyn_core::plugin::AuthPollResult::Done("signed in".into())),
                 Ok(None) => Ok(kyyn_core::plugin::AuthPollResult::Pending),
-                Err(e) => Ok(kyyn_core::plugin::AuthPollResult::Failed(format!(
-                    "{e:#}"
-                ))),
+                Err(e) => Ok(kyyn_core::plugin::AuthPollResult::Failed(format!("{e:#}"))),
             }
         })
     }

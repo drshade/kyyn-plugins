@@ -165,13 +165,9 @@ impl SourcePlugin for SharepointFilePlugin {
             )
             .await
             {
-                Ok(Some(())) => Ok(kyyn_core::plugin::AuthPollResult::Done(
-                    "signed in".into(),
-                )),
+                Ok(Some(())) => Ok(kyyn_core::plugin::AuthPollResult::Done("signed in".into())),
                 Ok(None) => Ok(kyyn_core::plugin::AuthPollResult::Pending),
-                Err(e) => Ok(kyyn_core::plugin::AuthPollResult::Failed(format!(
-                    "{e:#}"
-                ))),
+                Err(e) => Ok(kyyn_core::plugin::AuthPollResult::Failed(format!("{e:#}"))),
             }
         })
     }

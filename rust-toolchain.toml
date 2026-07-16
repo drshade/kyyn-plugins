@@ -1,0 +1,5 @@
+# One toolchain, local and CI — the gate is a single definition (ADR 0010).
+# Bump deliberately; a clippy release must never break main by surprise.
+[toolchain]
+channel = "1.97.0"
+components = ["rustfmt", "clippy"]
