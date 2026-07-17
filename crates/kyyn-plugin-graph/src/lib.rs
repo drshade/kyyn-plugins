@@ -222,8 +222,9 @@ impl SourcePlugin for GraphCalendarPlugin {
     }
 }
 
-/// Meetings that carry transcripts — the calendar is listed internally to
-/// find them, but only transcript-bearing meetings become items.
+/// Every meeting visible on the calendar — organized by anyone; transcript
+/// and attendance artifacts attach where Graph serves them (organizer-only),
+/// so invited meetings arrive artifact-less by design.
 pub struct GraphMeetingsPlugin;
 
 impl SourcePlugin for GraphMeetingsPlugin {
@@ -260,7 +261,7 @@ impl SourcePlugin for GraphMeetingsPlugin {
             ))
             .map_err(|e| format!("{e:#}"))?;
         Ok(FetchResult {
-            notes: format!("{} meetings with transcripts", items.len()),
+            notes: format!("{} meetings (artifacts where organizer)", items.len()),
             items,
             next_checkpoint: None,
         })

@@ -273,9 +273,13 @@ pub async fn sync_calendar(
     Ok(items)
 }
 
-/// Meetings WITH transcripts into the run directory — the calendar is
-/// listed internally (a transcript hangs off its online meeting), but only
-/// transcript-bearing events become items, kind `meeting`.
+/// Every VISIBLE meeting in the window into the run directory, kind
+/// `meeting` — organized by anyone, artifacts as bonus. A calendar entry is
+/// a meeting when it has attendees or is an online meeting; solo
+/// appointments and reminders are the calendar source's material. Transcript
+/// and attendance files attach where Graph serves them (organizer-only under
+/// delegated auth), so an invited-not-organized meeting lands artifact-less
+/// by design, not by failure.
 pub async fn sync_meetings(
     cfg: &Config,
     token_path: &Path,
@@ -291,13 +295,11 @@ pub async fn sync_meetings(
         raw_events.len()
     ));
     let artifacts = fetch_artifacts(&graph, &raw_events, out_dir).await?;
-    // EITHER artifact makes the event a meeting item — a talk can have
-    // attendance recorded with transcription off, and vice versa.
     let meetings: Vec<InboxEvent> = raw_events
         .into_iter()
         .zip(artifacts)
         .filter_map(|(e, (transcript, attendance))| {
-            (transcript.is_some() || attendance.is_some()).then(|| {
+            is_meeting(&e).then(|| {
                 to_inbox_event(
                     transcript.map(|n| format!("transcripts/{n}")),
                     attendance.map(|n| format!("attendance/{n}")),
@@ -307,7 +309,7 @@ pub async fn sync_meetings(
         })
         .collect();
     kyyn_core::progress::report(&format!(
-        "{} meetings carry artifacts ({} transcripts, {} attendance reports)",
+        "{} meetings ({} transcripts, {} attendance reports)",
         meetings.len(),
         meetings
             .iter()
@@ -331,6 +333,13 @@ pub async fn sync_meetings(
         items.push(item);
     }
     Ok(items)
+}
+
+/// A calendar entry counts as a MEETING when other people are on it or it
+/// carries an online-meeting surface. Attendance/transcript availability is
+/// deliberately NOT part of this judgement.
+fn is_meeting(e: &GraphEvent) -> bool {
+    !e.attendees.is_empty() || e.is_online_meeting.unwrap_or(false)
 }
 
 /// One provider record as a typed item: content-hashed from its canonical
@@ -569,4 +578,39 @@ async fn fetch_chat_messages(
     // Sort oldest-first by timestamp rather than trusting Graph's page order.
     acc.sort_by(|a, b| a.created_date_time.cmp(&b.created_date_time));
     Ok(acc.into_iter().map(to_inbox_chat_message).collect())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn event(extra: &str) -> GraphEvent {
+        let comma = if extra.is_empty() { "" } else { "," };
+        serde_json::from_str(&format!(
+            r#"{{"id":"e1","subject":"S",
+                "start":{{"dateTime":"2026-07-17T10:00:00","timeZone":"UTC"}},
+                "end":{{"dateTime":"2026-07-17T10:30:00","timeZone":"UTC"}}{comma}{extra}}}"#
+        ))
+        .expect("test event parses")
+    }
+
+    /// The case that used to vanish: someone else's invite, no artifacts
+    /// fetchable — still a meeting.
+    #[test]
+    fn an_invited_event_with_attendees_is_a_meeting() {
+        let e = event(r#""attendees":[{"emailAddress":{"name":"T","address":"t@x"}}]"#);
+        assert!(is_meeting(&e));
+    }
+
+    #[test]
+    fn an_online_meeting_without_listed_attendees_is_a_meeting() {
+        assert!(is_meeting(&event(r#""isOnlineMeeting":true"#)));
+    }
+
+    /// Solo appointments and reminders stay calendar-source material.
+    #[test]
+    fn a_solo_appointment_is_not_a_meeting() {
+        assert!(!is_meeting(&event("")));
+        assert!(!is_meeting(&event(r#""isOnlineMeeting":false"#)));
+    }
 }
